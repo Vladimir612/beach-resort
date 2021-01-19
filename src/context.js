@@ -3,21 +3,21 @@ import items from './data'
 const RoomContext = React.createContext()
 
 const RoomProvider = ({ children }) => {
-  const [resort, setResort] = useState({
-    rooms: [],
-    sortedRooms: [],
-    featuredRooms: [],
-    loading: true,
-    //filter
+  const [rooms, setRooms] = useState([])
+  const [sortedRooms, setSortedRooms] = useState([])
+  const [featuredRooms, setFeaturedRooms] = useState([])
+  const [loading, setLoading] = useState(true)
+  //filter
+  const [filter, setFilter] = useState({
     type: 'all',
     capacity: 1,
-    price: 0,
     minPrice: 0,
-    maxPrice: 0,
     minSize: 0,
-    maxSize: 0,
     breakfast: false,
     pets: false,
+    price: 0,
+    maxPrice: 0,
+    maxSize: 0,
   })
 
   const FormatData = (items) => {
@@ -31,27 +31,68 @@ const RoomProvider = ({ children }) => {
   }
 
   const getRoom = (slug) => {
-    let tempRooms = [...resort.rooms]
+    let tempRooms = [...rooms]
     const room = tempRooms.find((room) => room.slug === slug)
     return room
   }
 
   const handleChange = (e) => {
     const target = e.target
-    const value = e.type === 'checkbox' ? target.checked : target.value
+    const value = target.type === 'checkbox' ? target.checked : target.value
     const name = e.target.name
-    console.log(name, value)
 
-    setResort(
-      {
-        [name]: value,
-      },
-      filterRooms
-    )
+    setFilter({
+      ...filter,
+      [name]: value,
+    })
   }
 
+  useEffect(() => filterRooms(), [filter])
+
   const filterRooms = () => {
-    console.log('hello there')
+    let { type, capacity, price, minSize, maxSize, breakfast, pets } = filter
+
+    //all rooms
+    let tempRooms = [...rooms]
+
+    //transform value
+    capacity = parseInt(capacity)
+    price = parseInt(price)
+
+    //filter by type
+    if (type !== 'all') {
+      tempRooms = tempRooms.filter((room) => {
+        return room.type === type
+      })
+    }
+    //filter by capacity
+    if (capacity !== 1) {
+      tempRooms = tempRooms.filter((room) => {
+        return room.capacity === capacity
+      })
+    }
+    //filter by price
+    tempRooms = tempRooms.filter((room) => {
+      return room.price <= price
+    })
+    //filter by size
+    tempRooms = tempRooms.filter((room) => {
+      return room.size >= minSize && room.size <= maxSize
+    })
+    //filter by breakfast
+    if (breakfast) {
+      tempRooms = tempRooms.filter((room) => {
+        return room.breakfast === true
+      })
+    }
+    //filter by pets
+    if (pets) {
+      tempRooms = tempRooms.filter((room) => {
+        return room.pets === true
+      })
+    }
+    //change state
+    setSortedRooms(tempRooms)
   }
 
   useEffect(() => {
@@ -68,19 +109,30 @@ const RoomProvider = ({ children }) => {
         return room.size
       })
     )
-    setResort({
-      rooms: rooms,
-      sortedRooms: rooms,
-      featuredRooms: featuredRooms,
-      loading: false,
+    setRooms(rooms)
+    setSortedRooms(rooms)
+    setFeaturedRooms(featuredRooms)
+    setLoading(false)
+    setFilter({
+      ...filter,
       price: maxPrice,
-      maxPrice,
-      maxSize,
+      maxPrice: maxPrice,
+      maxSize: maxSize,
     })
   }, [])
 
   return (
-    <RoomContext.Provider value={{ ...resort, getRoom, handleChange }}>
+    <RoomContext.Provider
+      value={{
+        rooms,
+        sortedRooms,
+        featuredRooms,
+        loading,
+        getRoom,
+        handleChange,
+        ...filter,
+      }}
+    >
       {children}
     </RoomContext.Provider>
   )
