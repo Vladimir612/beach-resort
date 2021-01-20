@@ -101,7 +101,7 @@ const RoomProvider = ({ children }) => {
       //fetching the data from contentful
       let response = await Client.getEntries({
         content_type: 'beachResortRoom',
-        order: 'fields.price',
+        order: '-fields.price',
       })
 
       let rooms = FormatData(response.items)
