@@ -1,1 +1,1 @@
-Visit this site @ resorts-by-the-see.netlify.app
+Visit this site @ https://resorts-by-the-see.netlify.app/
