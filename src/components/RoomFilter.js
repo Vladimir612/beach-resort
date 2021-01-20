@@ -1,6 +1,7 @@
 import React from 'react'
 import { RoomContext } from '../context'
 import Title from '../components/Title'
+import StyledForm from './StyledForm'
 //get all unique values
 
 const getUnique = (array, value) => {
@@ -44,7 +45,7 @@ const RoomFilter = ({ rooms }) => {
   return (
     <section className='filter-container'>
       <Title title='search rooms' />
-      <form className='filter-form'>
+      <StyledForm>
         {/*select type*/}
         <div className='form-group'>
           <label htmlFor='type'>room type</label>
@@ -84,7 +85,7 @@ const RoomFilter = ({ rooms }) => {
             id='price'
             value={price}
             onChange={handleChange}
-            className='form-control'
+            className=' slider'
           />
         </div>
         {/*end of room price */}
@@ -135,7 +136,7 @@ const RoomFilter = ({ rooms }) => {
           </div>
         </div>
         {/* end of extras */}
-      </form>
+      </StyledForm>
     </section>
   )
 }
