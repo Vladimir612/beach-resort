@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react'
-import items from './data'
+//import items from './data'
+import Client from './Contentful'
+
 const RoomContext = React.createContext()
 
 const RoomProvider = ({ children }) => {
@@ -47,7 +49,7 @@ const RoomProvider = ({ children }) => {
     })
   }
 
-  useEffect(() => filterRooms(), [filter])
+  useEffect(() => filterRooms(), [filter]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const filterRooms = () => {
     let { type, capacity, price, minSize, maxSize, breakfast, pets } = filter
@@ -94,32 +96,45 @@ const RoomProvider = ({ children }) => {
     //change state
     setSortedRooms(tempRooms)
   }
+  const getData = async () => {
+    try {
+      //fetching the data from contentful
+      let response = await Client.getEntries({
+        content_type: 'beachResortRoom',
+        order: 'fields.price',
+      })
+
+      let rooms = FormatData(response.items)
+      let featuredRooms = rooms.filter((room) => room.featured === true)
+
+      let maxPrice = Math.max(
+        ...rooms.map((room) => {
+          return room.price
+        })
+      )
+      let maxSize = Math.max(
+        ...rooms.map((room) => {
+          return room.size
+        })
+      )
+      setRooms(rooms)
+      setSortedRooms(rooms)
+      setFeaturedRooms(featuredRooms)
+      setLoading(false)
+      setFilter({
+        ...filter,
+        price: maxPrice,
+        maxPrice: maxPrice,
+        maxSize: maxSize,
+      })
+    } catch (error) {
+      console.log(error)
+    }
+  }
 
   useEffect(() => {
-    let rooms = FormatData(items)
-    let featuredRooms = rooms.filter((room) => room.featured === true)
-
-    let maxPrice = Math.max(
-      ...rooms.map((room) => {
-        return room.price
-      })
-    )
-    let maxSize = Math.max(
-      ...rooms.map((room) => {
-        return room.size
-      })
-    )
-    setRooms(rooms)
-    setSortedRooms(rooms)
-    setFeaturedRooms(featuredRooms)
-    setLoading(false)
-    setFilter({
-      ...filter,
-      price: maxPrice,
-      maxPrice: maxPrice,
-      maxSize: maxSize,
-    })
-  }, [])
+    getData()
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <RoomContext.Provider

@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react'
+import React from 'react'
 import { RoomContext } from '../context'
 import Title from '../components/Title'
 //get all unique values
